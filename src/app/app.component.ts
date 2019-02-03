@@ -1,19 +1,16 @@
-import { Component, ViewChild} from '@angular/core';
-import { NgForm } from '@angular/forms';
-
+import { Component  } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import set = Reflect.set;
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styles: [`
-      .has-error input{
-      border: 1px solid red;
-      }
-  `]
+  .has-error input { 
+  border: 1px solid red;
+   }` ]
 })
-export class AppComponent {
-  @ViewChild('form') form: NgForm;
-
+export class AppComponent implements OnInit{
   answers = [{
     type: 'yes',
     text: 'Да'
@@ -22,30 +19,47 @@ export class AppComponent {
     text: 'Нет'
   }];
 
-  defaultAnswer = "no";
-  defaultCountry = "ua";
+  form:FormGroup;
+  charsCount = 5;
 
-  formData = {};
-  isSubmited = false;
+  ngOnInit() {
 
-  addRandEmail() {
-    const randEmail = 'wfm@gmail.com';
-    // this.form.setValue({
-    //   user: {
-    //     pass: '',
-    //     email: randEmail
-    //   },
-    //   country: '',
-    //   answer: ''
-    // })
-    this.form.form.patchValue({
-      user: {email: randEmail}
+    this.form = new FormGroup({
+      user:new FormGroup({
+        email: new FormControl('', [Validators.required, Validators.email], this.checkForEmail),
+        password: new FormControl('', [Validators.required, this.checkForLength.bind(this)]),
+      }),
+      country: new FormControl('ru'),
+      answer: new FormControl('no')
     })
   }
 
-  submitForm() {
-    this.isSubmited = true;
-    this.formData = this.form.value;
-    this.form.reset();
+  onSubmit() {
+    console.log(this.form)
+  }
+
+  // {'errorCode: true'}
+  // null undefined
+  checkForLength(control: FormControl) {
+    if(control.value.length <=this.charsCount) {
+      return {
+        'lengthError': true
+      };
+    }
+    return null;
+  }
+
+  checkForEmail(control: FormControl): Promise<any> {
+    return new Promise((resolve,reject) => {
+      setTimeout(()=> {
+        if (control.value === 'test@mail.ru') {
+          resolve({
+            'emailIsUsed': true
+          });
+        }else{
+          resolve(null);
+        }
+      }, 2000)
+    })
   }
 }
