@@ -1,65 +1,67 @@
-import { Component  } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import set = Reflect.set;
+import { Component, OnInit } from '@angular/core';
+import {CarsService} from "./cars.service";
 
+interface  Cars {
+  name: string;
+  color: string;
+  id: number;
+}
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styles: [`
-  .has-error input { 
-  border: 1px solid red;
-   }` ]
+  templateUrl: './app.component.html'
 })
-export class AppComponent implements OnInit{
-  answers = [{
-    type: 'yes',
-    text: 'Да'
-  }, {
-    type: 'no',
-    text: 'Нет'
-  }];
+export class AppComponent implements OnInit {
+  colors = [
+    'red',
+    'blue',
+    'yellow',
+    'grey',
+    'black'
+  ];
+  cars: any;
+  carName: string = '';
+  appTitle;
 
-  form:FormGroup;
-  charsCount = 5;
+  constructor(private carsService: CarsService) {}
+
 
   ngOnInit() {
-
-    this.form = new FormGroup({
-      user:new FormGroup({
-        email: new FormControl('', [Validators.required, Validators.email], this.checkForEmail),
-        password: new FormControl('', [Validators.required, this.checkForLength.bind(this)]),
-      }),
-      country: new FormControl('ru'),
-      answer: new FormControl('no')
-    })
+    this.appTitle = this.carsService.getAppTitle();
   }
 
-  onSubmit() {
-    console.log(this.form)
+  loadCars() {
+    this.cars = this.carsService.getCars();
+
   }
 
-  // {'errorCode: true'}
-  // null undefined
-  checkForLength(control: FormControl) {
-    if(control.value.length <=this.charsCount) {
-      return {
-        'lengthError': true
-      };
-    }
-    return null;
+  addCar() {
+    this.carsService
+      .addCar(this.carName)
+      .subscribe((car: Cars) => {
+        this.cars.push(car);
+      })
+    ;
+    this.carName = '';
   }
 
-  checkForEmail(control: FormControl): Promise<any> {
-    return new Promise((resolve,reject) => {
-      setTimeout(()=> {
-        if (control.value === 'test@mail.ru') {
-          resolve({
-            'emailIsUsed': true
-          });
-        }else{
-          resolve(null);
-        }
-      }, 2000)
-    })
+  getRandColor() {
+    const num = Math.round(Math.random() * (this.colors.length - 1));
+    return this.colors[num];
   }
+
+  setNewColor(car:Cars) {
+    this.carsService.changeColor(car, this.getRandColor())
+      .subscribe((data) => {
+        console.log(data);
+      })
+  }
+
+  deleteCar(car:Cars) {
+    this.carsService.deleteSomeCar(car)
+      .subscribe((data) => {
+        this.cars = this.cars.filter(c => c.id !== car.id);
+      })
+  }
+
+
 }

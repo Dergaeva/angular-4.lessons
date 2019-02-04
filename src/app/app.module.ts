@@ -1,9 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from "@angular/common/http";
 
 import { AppComponent } from './app.component';
+import {CarsService} from "./cars.service";
 
 @NgModule({
   declarations: [
@@ -11,10 +12,10 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
-    ReactiveFormsModule,
-    HttpModule
+    FormsModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [CarsService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
